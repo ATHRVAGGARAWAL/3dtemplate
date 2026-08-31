@@ -1,6 +1,7 @@
 import { AdaptiveDpr, Preload } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { Suspense } from 'react'
+import { Effects } from './Effects'
 import { Scene } from './Scene'
 
 /**
@@ -13,12 +14,13 @@ export function StickyCanvas() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
       <Canvas
-        dpr={[1, 1.75]}
-        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+        dpr={[1, 1.5]}
+        gl={{ antialias: false, alpha: false, powerPreference: 'high-performance' }}
         camera={{ position: [0, 0, 6.4], fov: 38, near: 0.1, far: 60 }}
       >
         <Suspense fallback={null}>
           <Scene />
+          <Effects />
           <Preload all />
         </Suspense>
         <AdaptiveDpr pixelated={false} />

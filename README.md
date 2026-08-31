@@ -28,6 +28,10 @@ state — only the *discrete* "which section is active" value is published, via
 toward* a scroll-derived target (`maath/easing`). That is what makes the type
 feel weighted instead of glued to the scrollbar.
 
+Scroll velocity is a second signal on top of position: it drives the fresnel
+rim on the type and the RGB split in post, so the page smears when you throw
+it and snaps clean the moment it settles.
+
 ```
 scroll position ──► store (mutable)  ──► useFrame ──► damp toward target
                 └─► CSS custom props ──► HTML colours
@@ -43,7 +47,9 @@ scroll position ──► store (mutable)  ──► useFrame ──► damp tow
 | `src/scroll/controls.ts` | `scrollTo()` for nav + scrollbar |
 | `src/three/useWordLayout.ts` | Per-letter layout from typeface metrics |
 | `src/three/Word3D.tsx` | Extruded letters, stagger, word swapping |
-| `src/three/Scene.tsx` | Lights, reflection probe, camera |
+| `src/three/Scene.tsx` | Lights, reflection probe, camera, page background |
+| `src/three/typeMaterial.ts` | Gradient + fresnel injected into MeshStandardMaterial |
+| `src/three/Effects.tsx` | Bloom / chromatic aberration / grain / vignette |
 | `src/ui/ScrollRail.tsx` | Custom draggable scrollbar (Motion) |
 
 ## Customising
@@ -70,6 +76,26 @@ pick it up — no other file changes.
 `public/fonts/`, and point `FONT_URL` at it. Letter spacing comes from the
 font's own `glyph.ha / resolution` advance metrics, so kerning stays correct
 for any font you use.
+
+## The shader
+
+`typeMaterial.ts` patches three's stock `MeshStandardMaterial` through
+`onBeforeCompile` rather than writing a shader from scratch — that keeps the
+lighting, tone mapping and environment reflections, and only adds a vertical
+gradient and a fresnel rim on top of `outgoingLight`. One material instance is
+shared by every letter, so there is a single program and one set of uniforms.
+
+Two things to know if you retune it:
+
+- **Bloom threshold is load-bearing.** The glyphs are cream (luminance ~0.87).
+  Anything below ~0.95 blooms the whole letter body and the page turns milky —
+  which kills the flat colour fields the whole look depends on. Only the
+  fresnel rim, which pushes past 1.0, should ever glow.
+- **The canvas is opaque.** `Scene.tsx` assigns the live background colour to
+  `scene.background`, so post passes have real pixels to work on. Running
+  vignette or grain over a transparent canvas darkens the empty pixels and
+  reveals the vignette as a ring. The `--bg` custom property is now only a
+  pre-WebGL fallback.
 
 ## Notes
 

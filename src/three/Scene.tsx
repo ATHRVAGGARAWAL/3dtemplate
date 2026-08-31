@@ -1,7 +1,7 @@
 import { Environment, Lightformer } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { damp3 } from 'maath/easing'
-import { useRef } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import type { AmbientLight, PointLight } from 'three'
 import { accentColor, bgColor, pointer, scroll } from '../scroll/store'
 import { Debris } from './Debris'
@@ -10,6 +10,17 @@ import { WordStack } from './Word3D'
 export function Scene() {
   const ambient = useRef<AmbientLight>(null!)
   const rim = useRef<PointLight>(null!)
+  const scene = useThree((state) => state.scene)
+
+  // Hand the scene the same Color instance the scroll loop mutates in place,
+  // so the background tracks the sections with no per-frame assignment. The
+  // canvas is opaque from here on, which is what lets postprocessing run.
+  useLayoutEffect(() => {
+    scene.background = bgColor
+    return () => {
+      scene.background = null
+    }
+  }, [scene])
 
   useFrame((state, dt) => {
     // Tint the fill light with the live page background so the type looks like
