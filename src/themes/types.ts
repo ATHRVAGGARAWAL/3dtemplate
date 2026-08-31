@@ -64,10 +64,27 @@ export type Mood = {
   /** Where the figure sits relative to the word, and how big. */
   figurePosition: [number, number, number]
   figureScale: number
+
 }
+
+/**
+ * Which scroll grammar a preset uses. This is the axis that actually changes
+ * how a page *moves*; `mood` only ever changed how a frame is shaded, which is
+ * why five presets sharing one engine read as one site recoloured.
+ *
+ * - `stage`     camera parked, words swap in place — sections are states.
+ * - `exploded`  object locked centre, scroll separates it along its assembly
+ *               axes while HTML annotations track projected 3D points.
+ * - `filmstrip` vertical scroll drives a sideways dolly across one wide set,
+ *               with real parallax between depth layers.
+ * - `particles` one 30k-point field that continuously reforms between word
+ *               silhouettes. Nothing ever cuts or swaps.
+ */
+export type Engine = 'stage' | 'exploded' | 'filmstrip' | 'particles'
 
 export type Preset = {
   key: string
+  engine: Engine
   /** Shown in the preset switcher. */
   label: string
   brand: string

@@ -6,6 +6,7 @@ import type { Preset } from './types'
  * palette is light and nothing should glow.
  */
 export const form: Preset = {
+  engine: 'exploded',
   key: 'form',
   label: 'Form — architecture',
   brand: 'Form',

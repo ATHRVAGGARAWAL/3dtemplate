@@ -2,6 +2,7 @@ import type { Preset } from './types'
 
 /** Maximum saturation, tilted camera, heaviest scroll smear of the set. */
 export const riot: Preset = {
+  engine: 'particles',
   key: 'riot',
   label: 'Riot — festival',
   brand: 'Riot',

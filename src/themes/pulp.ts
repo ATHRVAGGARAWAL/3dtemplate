@@ -1,6 +1,7 @@
 import type { Preset } from './types'
 
 export const pulp: Preset = {
+  engine: 'stage',
   key: 'pulp',
   label: 'Pulp — drinks',
   brand: 'Pulp',

@@ -2,6 +2,7 @@ import type { Preset } from './types'
 
 /** Matte, high-contrast, snappy. Nothing here should look expensive. */
 export const raw: Preset = {
+  engine: 'exploded',
   key: 'raw',
   label: 'Raw — skate',
   brand: 'Raw',

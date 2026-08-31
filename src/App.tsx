@@ -5,17 +5,20 @@ import { SmoothScroll } from './scroll/SmoothScroll'
 import { usePreset } from './themes'
 import { StickyCanvas } from './three/StickyCanvas'
 import { Nav } from './ui/Nav'
+import { Annotations } from './ui/Annotations'
 import { PresetSwitcher } from './ui/PresetSwitcher'
 import { ScrollRail } from './ui/ScrollRail'
 
 export default function App() {
-  const sections = usePreset().sections
+  const preset = usePreset()
+  const sections = preset.sections
 
   return (
     <MotionConfig reducedMotion="user">
       <SmoothScroll>
       <StickyCanvas />
       <Nav />
+      {preset.engine === 'exploded' && <Annotations />}
       <ScrollRail />
       <PresetSwitcher />
 

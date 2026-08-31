@@ -5,6 +5,7 @@ import type { Preset } from './types'
  * almost nothing in frame is bright. That is what lets the rim light carry.
  */
 export const vault: Preset = {
+  engine: 'filmstrip',
   key: 'vault',
   label: 'Vault — fintech',
   brand: 'Vault',

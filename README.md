@@ -6,17 +6,19 @@ from the architecture behind [active-hop.com](https://www.active-hop.com/en).
 
 Switch brands live with the control bottom-left, or `?theme=<key>`:
 
-| key | brand | character |
-|---|---|---|
-| `pulp` | drinks | orange/olive, balanced — the reference build |
-| `raw` | skate | acid on near-black, matte, snappy damping, heavy grain |
-| `vault` | fintech | dark + metallic, low bloom threshold, strong rim |
-| `riot` | festival | magenta/chrome, tilted camera, heaviest scroll smear |
-| `form` | architecture | monochrome, slow damping, almost no post |
+| key | brand | engine | what scroll actually does |
+|---|---|---|---|
+| `pulp` | drinks | `stage` | camera parked, words swap in place |
+| `raw` | skate | `exploded` | separates a deck into plies, trucks, wheels |
+| `form` | architecture | `exploded` | separates a massing study, slowly |
+| `vault` | fintech | `filmstrip` | vertical wheel drives a sideways dolly |
+| `riot` | festival | `particles` | 30k points morph between letterforms |
 
-Each preset owns its palette, copy, 3D word, **procedural figure** and a
-`mood` block that drives material, lighting, post-processing and damping —
-so the presets move differently, not just recolour.
+**The engine is the axis that matters.** An earlier version of this repo had
+one engine and five `mood` blocks, and every brand felt identical — because
+`mood` only changes how a frame is *shaded* (roughness, bloom, damping), never
+how the page *moves*. Palette is not design. Each engine below owns its own
+camera logic, spatial layout and scroll mapping.
 
 ```bash
 npm install
@@ -58,6 +60,10 @@ scroll position ──► store (mutable)  ──► useFrame ──► damp tow
 | `src/themes/*.ts` | **Start here.** One file per brand: palette, copy, mood. |
 | `src/themes/figures.ts` | Hero objects as primitive lists — no model files |
 | `src/three/Figure.tsx` | Renders + assembles any figure from that data |
+| `src/three/engines/Exploded.tsx` | Technical-drawing engine + 3D→screen anchors |
+| `src/three/engines/Filmstrip.tsx` | Sideways dolly across one wide set |
+| `src/three/engines/Particles.tsx` | 30k GPU-morphed points |
+| `src/ui/Annotations.tsx` | HTML labels tracking projected 3D points |
 | `src/scroll/SmoothScroll.tsx` | rAF loop, section detection, colour blending |
 | `src/scroll/store.ts` | Per-frame state + live `THREE.Color`s |
 | `src/scroll/controls.ts` | `scrollTo()` for nav + scrollbar |
