@@ -1,0 +1,63 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-pop-orange: #ff5b04;
+  --color-pop-olive: #bccc32;
+  --color-pop-deep: #45530f;
+  --color-pop-cream: #e9ebd2;
+  --color-pop-ink: #17170a;
+
+  --font-display: 'Archivo', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Roboto Mono', Menlo, monospace;
+}
+
+@layer base {
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+
+  html {
+    /* Lenis drives scrolling; native smooth-scroll would fight it. */
+    scroll-behavior: auto;
+    /* The native scrollbar is replaced by <ScrollRail>. Scrolling still works
+       exactly as before — only the default chrome is hidden. */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    background: var(--bg, #ff5b04);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    margin: 0;
+    background: transparent;
+    color: var(--fg, #17170a);
+    font-family: var(--font-mono);
+    overscroll-behavior-y: none;
+  }
+
+  ::selection {
+    background: var(--color-pop-ink);
+    color: var(--color-pop-cream);
+  }
+}
+
+/* Lenis requirement: the scroller must not be height-constrained. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
