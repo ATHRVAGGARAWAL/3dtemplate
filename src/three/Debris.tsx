@@ -5,9 +5,9 @@ import { useMemo, useRef } from 'react'
 import type { Group, MeshStandardMaterial } from 'three'
 import { hashSigned } from '../lib/math'
 import { accentColor, scroll } from '../scroll/store'
+import { usePreset } from '../themes'
 
 type Shape = 'torus' | 'box' | 'capsule' | 'icosa'
-const SHAPES: Shape[] = ['torus', 'box', 'capsule', 'icosa', 'torus', 'box']
 
 function Geometry({ kind }: { kind: Shape }) {
   switch (kind) {
@@ -29,20 +29,21 @@ function Geometry({ kind }: { kind: Shape }) {
 export function Debris() {
   const root = useRef<Group>(null!)
   const materials = useRef<MeshStandardMaterial[]>([])
+  const { debris } = usePreset().mood
 
   const items = useMemo(
     () =>
-      SHAPES.map((kind, i) => ({
-        kind,
+      Array.from({ length: debris.count }, (_, i) => ({
+        kind: debris.kinds[i % debris.kinds.length] as Shape,
         position: [hashSigned(i * 9.1) * 7, hashSigned(i * 4.3) * 3.4, -3 - Math.abs(hashSigned(i * 6.7)) * 4] as [
           number,
           number,
           number,
         ],
         rotation: [hashSigned(i * 2.9) * 3, hashSigned(i * 8.2) * 3, 0] as [number, number, number],
-        scale: 0.7 + Math.abs(hashSigned(i * 3.7)) * 0.8,
+        scale: (0.7 + Math.abs(hashSigned(i * 3.7)) * 0.8) * debris.scale,
       })),
-    [],
+    [debris],
   )
 
   useFrame((_, dt) => {

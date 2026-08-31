@@ -2,7 +2,7 @@ import Lenis from 'lenis'
 import { useEffect, type ReactNode } from 'react'
 import { Color } from 'three'
 import { clamp, smoothstep } from '../lib/math'
-import { SECTIONS } from '../theme'
+import { getPreset, onPresetChange } from '../themes'
 import { setLenis } from './controls'
 import { accentColor, bgColor, emit, fgColor, pointer, scroll, wordColor } from './store'
 
@@ -74,14 +74,15 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
 
       const rect = rects[i]
       const local = clamp((centre - rect.top) / Math.max(rect.height, 1))
-      const next = Math.min(i + 1, SECTIONS.length - 1)
+      const sections = getPreset().sections
+      const next = Math.min(i + 1, sections.length - 1)
       const blend = next === i ? 0 : smoothstep(0.62, 1, local)
 
       scroll.local = local
       scroll.blend = blend
 
-      const from = SECTIONS[i]
-      const to = SECTIONS[next]
+      const from = sections[i]
+      const to = sections[next]
       bgColor.set(from.bg).lerp(tmp.set(to.bg), blend)
       fgColor.set(from.fg).lerp(tmp.set(to.fg), blend)
       wordColor.set(from.word3d).lerp(tmp.set(to.word3d), blend)
@@ -100,6 +101,16 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       if (changed) emit()
     }
 
+    // A preset swap replaces every section, so the cached rects are stale.
+    // Wait a frame for React to commit the new DOM before re-measuring.
+    const unsubscribe = onPresetChange(() => {
+      requestAnimationFrame(() => {
+        measure()
+        lenis.scrollTo(0, { immediate: true })
+        update()
+      })
+    })
+
     let frame = requestAnimationFrame(function loop(time: number) {
       lenis.raf(time)
       update()
@@ -108,6 +119,7 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
 
     return () => {
       cancelAnimationFrame(frame)
+      unsubscribe()
       ro.disconnect()
       window.removeEventListener('resize', measure)
       window.removeEventListener('pointermove', onPointerMove)

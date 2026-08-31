@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { clamp } from '../lib/math'
 import { scrollTo } from '../scroll/controls'
 import { useActiveSection } from '../scroll/store'
-import { SECTIONS } from '../theme'
+import { usePreset } from '../themes'
 
 const THUMB_H = 54
 
@@ -47,6 +47,7 @@ export function ScrollRail() {
   const [hovered, setHovered] = useState(false)
   const active = useActiveSection()
   const ratios = useSectionRatios()
+  const SECTIONS = usePreset().sections
 
   const { scrollYProgress } = useScroll()
   const smooth = useSpring(scrollYProgress, { stiffness: 260, damping: 40, mass: 0.35 })

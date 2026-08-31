@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import { Color } from 'three'
-import { SECTIONS } from '../theme'
+import { getPreset } from '../themes'
 
 /**
  * Per-frame scroll state lives in a plain mutable object rather than React
@@ -33,10 +33,11 @@ export const scroll = {
 export const pointer = { x: 0, y: 0 }
 
 /** Live blended colours, mutated in place each frame and read by the 3D scene. */
-export const bgColor = new Color(SECTIONS[0].bg)
-export const fgColor = new Color(SECTIONS[0].fg)
-export const wordColor = new Color(SECTIONS[0].word3d)
-export const accentColor = new Color(SECTIONS[0].accent)
+const first = getPreset().sections[0]
+export const bgColor = new Color(first.bg)
+export const fgColor = new Color(first.fg)
+export const wordColor = new Color(first.word3d)
+export const accentColor = new Color(first.accent)
 
 const listeners = new Set<() => void>()
 export const emit = () => listeners.forEach((fn) => fn())

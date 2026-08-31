@@ -1,6 +1,6 @@
 import { useFont } from '@react-three/drei'
 import { useMemo } from 'react'
-import { FONT_URL } from '../theme'
+import { FONT_URL } from '../themes'
 
 export type LetterLayout = {
   char: string

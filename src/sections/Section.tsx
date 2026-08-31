@@ -1,6 +1,6 @@
 import { motion } from 'motion/react'
 import { Reveal } from '../ui/Reveal'
-import type { SectionDef } from '../theme'
+import type { SectionDef } from '../themes'
 
 /**
  * Copy is deliberately pinned to the top and bottom edges: the middle band of

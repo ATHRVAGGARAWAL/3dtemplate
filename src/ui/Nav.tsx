@@ -1,11 +1,13 @@
 import { motion } from 'motion/react'
 import { scrollTo } from '../scroll/controls'
 import { useActiveSection } from '../scroll/store'
-import { SECTIONS } from '../theme'
+import { usePreset } from '../themes'
 import { EASE } from './Reveal'
 
 export function Nav() {
   const active = useActiveSection()
+  const preset = usePreset()
+  const SECTIONS = preset.sections
 
   return (
     <motion.header
@@ -21,7 +23,8 @@ export function Nav() {
         whileTap={{ scale: 0.96 }}
         className="pointer-events-auto font-display text-lg font-black tracking-[-0.03em] uppercase"
       >
-        Pulp<sup className="ml-0.5 align-super text-[0.6em]">®</sup>
+        {preset.brand}
+        <sup className="ml-0.5 align-super text-[0.6em]">®</sup>
       </motion.button>
 
       <nav className="pointer-events-auto hidden items-center gap-1 md:flex">

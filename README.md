@@ -1,8 +1,22 @@
-# PULP — 3D scroll site
+# 3dtemplate
 
-A scroll-driven marketing page: bold pop colour blocks, extruded 3D type that
+Five brands, one engine. A scroll-driven marketing page: bold pop colour blocks, extruded 3D type that
 swaps word-by-word as you scroll, and a custom scrollbar. Reverse-engineered
 from the architecture behind [active-hop.com](https://www.active-hop.com/en).
+
+Switch brands live with the control bottom-left, or `?theme=<key>`:
+
+| key | brand | character |
+|---|---|---|
+| `pulp` | drinks | orange/olive, balanced — the reference build |
+| `raw` | skate | acid on near-black, matte, snappy damping, heavy grain |
+| `vault` | fintech | dark + metallic, low bloom threshold, strong rim |
+| `riot` | festival | magenta/chrome, tilted camera, heaviest scroll smear |
+| `form` | architecture | monochrome, slow damping, almost no post |
+
+Each preset owns its palette, copy, 3D word, **procedural figure** and a
+`mood` block that drives material, lighting, post-processing and damping —
+so the presets move differently, not just recolour.
 
 ```bash
 npm install
@@ -41,7 +55,9 @@ scroll position ──► store (mutable)  ──► useFrame ──► damp tow
 
 | Path | Role |
 |---|---|
-| `src/theme.ts` | **Start here.** Sections, words, colours, copy. |
+| `src/themes/*.ts` | **Start here.** One file per brand: palette, copy, mood. |
+| `src/themes/figures.ts` | Hero objects as primitive lists — no model files |
+| `src/three/Figure.tsx` | Renders + assembles any figure from that data |
 | `src/scroll/SmoothScroll.tsx` | rAF loop, section detection, colour blending |
 | `src/scroll/store.ts` | Per-frame state + live `THREE.Color`s |
 | `src/scroll/controls.ts` | `scrollTo()` for nav + scrollbar |
@@ -52,11 +68,26 @@ scroll position ──► store (mutable)  ──► useFrame ──► damp tow
 | `src/three/Effects.tsx` | Bloom / chromatic aberration / grain / vignette |
 | `src/ui/ScrollRail.tsx` | Custom draggable scrollbar (Motion) |
 
-## Customising
+## Adding a brand
 
-Everything content-facing lives in `src/theme.ts`. Add an entry to `SECTIONS`
-and the background, the copy, the 3D word, the nav and the scrollbar ticks all
-pick it up — no other file changes.
+Copy any file in `src/themes/`, edit it, register it in `themes/index.ts`. The
+background, copy, 3D word, nav, scrollbar ticks, lighting, post-processing and
+switcher all pick it up — no other file changes.
+
+A figure is a list of primitives with a home pose and a colour role, so a new
+hero object needs shapes, not a component:
+
+```ts
+tower: [
+  { kind: 'box', args: [1.7, 0.24, 1.6], pos: [0, -1.0, 0], tone: 'word' },
+  { kind: 'box', args: [0.11, 2.9, 0.11], pos: [0.86, 0, 0.82], tone: 'accent' },
+]
+```
+
+`Figure.tsx` damps each part between an exploded pose and its home pose as the
+section settles, so every figure assembles itself for free.
+
+### Section shape
 
 ```ts
 {

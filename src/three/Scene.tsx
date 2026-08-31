@@ -4,13 +4,16 @@ import { damp3 } from 'maath/easing'
 import { useLayoutEffect, useRef } from 'react'
 import type { AmbientLight, PointLight } from 'three'
 import { accentColor, bgColor, pointer, scroll } from '../scroll/store'
+import { usePreset } from '../themes'
 import { Debris } from './Debris'
+import { Figure } from './Figure'
 import { WordStack } from './Word3D'
 
 export function Scene() {
   const ambient = useRef<AmbientLight>(null!)
   const rim = useRef<PointLight>(null!)
   const scene = useThree((state) => state.scene)
+  const mood = usePreset().mood
 
   // Hand the scene the same Color instance the scroll loop mutates in place,
   // so the background tracks the sections with no per-frame assignment. The
@@ -31,8 +34,8 @@ export function Scene() {
     const { camera } = state
     damp3(
       camera.position,
-      [pointer.x * 0.45, 0.25 + pointer.y * 0.3, 6.4 - Math.sin(scroll.progress * Math.PI) * 0.9],
-      0.55,
+      [pointer.x * 0.45, 0.25 + pointer.y * 0.3, mood.distance - Math.sin(scroll.progress * Math.PI) * 0.9],
+      0.55 * mood.damping,
       dt,
     )
     camera.lookAt(0, 0, 0)
@@ -40,9 +43,9 @@ export function Scene() {
 
   return (
     <>
-      <ambientLight ref={ambient} intensity={1.35} />
-      <directionalLight position={[4, 6, 6]} intensity={2.1} />
-      <pointLight ref={rim} position={[-5, -2.5, 3]} intensity={45} distance={20} decay={2} />
+      <ambientLight ref={ambient} intensity={mood.ambient} />
+      <directionalLight position={[4, 6, 6]} intensity={mood.key} />
+      <pointLight ref={rim} position={[-5, -2.5, 3]} intensity={mood.rim} distance={20} decay={2} />
 
       {/* Rendered once (frames={1}) — a static reflection probe built from
           geometry, so there is no HDR download and no per-frame cost. */}
@@ -53,6 +56,7 @@ export function Scene() {
       </Environment>
 
       <Debris />
+      <Figure />
       <WordStack />
     </>
   )

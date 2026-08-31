@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import type { Group } from 'three'
 import { clamp, hashSigned } from '../lib/math'
 import { accentColor, pointer, scroll, useActiveWord, wordColor } from '../scroll/store'
-import { FONT_URL, SECTIONS } from '../theme'
+import { FONT_URL, usePreset } from '../themes'
 import { createTypeMaterial, type TypeMaterial } from './typeMaterial'
 import { useWordLayout } from './useWordLayout'
 
@@ -20,6 +20,7 @@ type LetterProps = {
   active: boolean
   seed: number
   shared: TypeMaterial
+  damping: number
 }
 
 /**
@@ -27,7 +28,7 @@ type LetterProps = {
  * every property is *damped toward* a scroll-derived target, which is what
  * makes the type feel weighted instead of glued to the scrollbar.
  */
-function Letter({ char, homeX, pivot, capHeight, index, active, seed, shared }: LetterProps) {
+function Letter({ char, homeX, pivot, capHeight, index, active, seed, shared, damping }: LetterProps) {
   const group = useRef<Group>(null!)
 
   // Stable per-letter scatter direction, so the "break apart" pose is the same
@@ -50,7 +51,7 @@ function Letter({ char, homeX, pivot, capHeight, index, active, seed, shared }: 
     if (!g) return
 
     // Later letters carry a longer smoothTime, which cascades them into place.
-    const smooth = active ? 0.34 + index * 0.055 : 0.26 + index * 0.03
+    const smooth = (active ? 0.34 + index * 0.055 : 0.26 + index * 0.03) * damping
 
     if (active) {
       const t = state.clock.elapsedTime
@@ -97,11 +98,13 @@ function Word({
   index,
   active,
   shared,
+  damping,
 }: {
   word: string
   index: number
   active: boolean
   shared: TypeMaterial
+  damping: number
 }) {
   const { letters, width, capHeight } = useWordLayout(word, SIZE, 0.02)
   const viewport = useThree((state) => state.viewport)
@@ -123,6 +126,7 @@ function Word({
             active={active}
             seed={index * 31 + i * 7 + 1}
             shared={shared}
+            damping={damping}
           />
         ) : null,
       )}
@@ -138,6 +142,8 @@ function Word({
 export function WordStack() {
   const root = useRef<Group>(null!)
   const activeWord = useActiveWord()
+  const preset = usePreset()
+  const mood = preset.mood
 
   const shared = useMemo(() => createTypeMaterial(), [])
   useEffect(() => () => shared.material.dispose(), [shared])
@@ -149,25 +155,37 @@ export function WordStack() {
     // Colours ride the same blended values the HTML uses, so type and page
     // never disagree mid-transition.
     shared.material.color.copy(wordColor)
+    shared.material.roughness = mood.roughness
+    shared.material.metalness = mood.metalness
+    shared.material.envMapIntensity = mood.envIntensity
     shared.uniforms.uGradient.value.copy(accentColor)
     shared.uniforms.uAccent.value.copy(accentColor)
+    shared.uniforms.uTint.value = mood.tint
+    shared.uniforms.uFresnelPower.value = mood.fresnelPower
     // Scrolling hard lights the rim, which the bloom pass then picks up.
     const speed = clamp(Math.abs(scroll.velocity) * 0.02, 0, 1)
-    damp(shared.uniforms.uFresnel, 'value', 0.16 + speed * 0.85, 0.25, dt)
+    damp(shared.uniforms.uFresnel, 'value', mood.fresnel + speed * mood.fresnelVelocity, 0.25, dt)
     // A little scroll-driven yaw plus pointer parallax gives the type volume.
     const yaw = (scroll.local - 0.5) * 0.5 + pointer.x * 0.22
     const pitch = -pointer.y * 0.14
-    dampE(g.rotation, [pitch, yaw, 0], 0.5, dt)
+    dampE(g.rotation, [pitch, yaw, mood.tilt], 0.5 * mood.damping, dt)
     // Sit slightly above centre so the word clears the copy pinned to the
     // bottom of every section.
-    damp(g.position, 'y', 0.35, 0.5, dt)
-    damp(g.position, 'z', scroll.blend * -0.9, 0.5, dt)
+    damp(g.position, 'y', 0.35, 0.5 * mood.damping, dt)
+    damp(g.position, 'z', scroll.blend * -0.9, 0.5 * mood.damping, dt)
   })
 
   return (
     <group ref={root}>
-      {SECTIONS.map((section, i) => (
-        <Word key={section.id} word={section.word} index={i} active={i === activeWord} shared={shared} />
+      {preset.sections.map((section, i) => (
+        <Word
+          key={`${preset.key}-${section.id}`}
+          word={section.word}
+          index={i}
+          active={i === activeWord}
+          shared={shared}
+          damping={mood.damping}
+        />
       ))}
     </group>
   )
