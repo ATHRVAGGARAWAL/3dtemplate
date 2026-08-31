@@ -1,24 +1,8 @@
 # 3dtemplate
 
-Five brands, one engine. A scroll-driven marketing page: bold pop colour blocks, extruded 3D type that
+A scroll-driven marketing page: bold pop colour blocks, extruded 3D type that
 swaps word-by-word as you scroll, and a custom scrollbar. Reverse-engineered
 from the architecture behind [active-hop.com](https://www.active-hop.com/en).
-
-Switch brands live with the control bottom-left, or `?theme=<key>`:
-
-| key | brand | engine | what scroll actually does |
-|---|---|---|---|
-| `pulp` | drinks | `stage` | camera parked, words swap in place |
-| `raw` | skate | `exploded` | separates a deck into plies, trucks, wheels |
-| `form` | architecture | `exploded` | separates a massing study, slowly |
-| `vault` | fintech | `filmstrip` | vertical wheel drives a sideways dolly |
-| `riot` | festival | `particles` | 30k points morph between letterforms |
-
-**The engine is the axis that matters.** An earlier version of this repo had
-one engine and five `mood` blocks, and every brand felt identical — because
-`mood` only changes how a frame is *shaded* (roughness, bloom, damping), never
-how the page *moves*. Palette is not design. Each engine below owns its own
-camera logic, spatial layout and scroll mapping.
 
 ```bash
 npm install
@@ -57,13 +41,9 @@ scroll position ──► store (mutable)  ──► useFrame ──► damp tow
 
 | Path | Role |
 |---|---|
-| `src/themes/*.ts` | **Start here.** One file per brand: palette, copy, mood. |
+| `src/themes/pulp.ts` | **Start here.** Palette, copy, sections, mood. |
 | `src/themes/figures.ts` | Hero objects as primitive lists — no model files |
 | `src/three/Figure.tsx` | Renders + assembles any figure from that data |
-| `src/three/engines/Exploded.tsx` | Technical-drawing engine + 3D→screen anchors |
-| `src/three/engines/Filmstrip.tsx` | Sideways dolly across one wide set |
-| `src/three/engines/Particles.tsx` | 30k GPU-morphed points |
-| `src/ui/Annotations.tsx` | HTML labels tracking projected 3D points |
 | `src/scroll/SmoothScroll.tsx` | rAF loop, section detection, colour blending |
 | `src/scroll/store.ts` | Per-frame state + live `THREE.Color`s |
 | `src/scroll/controls.ts` | `scrollTo()` for nav + scrollbar |
@@ -74,19 +54,21 @@ scroll position ──► store (mutable)  ──► useFrame ──► damp tow
 | `src/three/Effects.tsx` | Bloom / chromatic aberration / grain / vignette |
 | `src/ui/ScrollRail.tsx` | Custom draggable scrollbar (Motion) |
 
-## Adding a brand
+## Customising
 
-Copy any file in `src/themes/`, edit it, register it in `themes/index.ts`. The
-background, copy, 3D word, nav, scrollbar ticks, lighting, post-processing and
-switcher all pick it up — no other file changes.
+Everything content-facing lives in `src/themes/pulp.ts`. Add an entry to
+`sections` and the background, copy, 3D word, nav and scrollbar ticks all pick
+it up — no other file changes. `mood` drives material, lighting,
+post-processing and damping.
 
-A figure is a list of primitives with a home pose and a colour role, so a new
-hero object needs shapes, not a component:
+The hero figure is a list of primitives with a home pose and a colour role, so
+changing it means describing shapes, not writing a component. `figures.ts`
+ships five (`can`, `deck`, `vault`, `speaker`, `tower`); Pulp uses `can`:
 
 ```ts
-tower: [
-  { kind: 'box', args: [1.7, 0.24, 1.6], pos: [0, -1.0, 0], tone: 'word' },
-  { kind: 'box', args: [0.11, 2.9, 0.11], pos: [0.86, 0, 0.82], tone: 'accent' },
+can: [
+  { kind: 'cyl', args: [0.55, 0.55, 1.7, 40], pos: [0, 0, 0], tone: 'word' },
+  { kind: 'cyl', args: [0.5, 0.56, 0.13, 40], pos: [0, 0.9, 0], tone: 'accent' },
 ]
 ```
 

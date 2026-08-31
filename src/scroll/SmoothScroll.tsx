@@ -2,7 +2,7 @@ import Lenis from 'lenis'
 import { useEffect, type ReactNode } from 'react'
 import { Color } from 'three'
 import { clamp, smoothstep } from '../lib/math'
-import { getPreset, onPresetChange } from '../themes'
+import { getPreset } from '../themes'
 import { setLenis } from './controls'
 import { accentColor, bgColor, emit, fgColor, pointer, scroll, wordColor } from './store'
 
@@ -101,16 +101,6 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       if (changed) emit()
     }
 
-    // A preset swap replaces every section, so the cached rects are stale.
-    // Wait a frame for React to commit the new DOM before re-measuring.
-    const unsubscribe = onPresetChange(() => {
-      requestAnimationFrame(() => {
-        measure()
-        lenis.scrollTo(0, { immediate: true })
-        update()
-      })
-    })
-
     let frame = requestAnimationFrame(function loop(time: number) {
       lenis.raf(time)
       update()
@@ -119,7 +109,6 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
 
     return () => {
       cancelAnimationFrame(frame)
-      unsubscribe()
       ro.disconnect()
       window.removeEventListener('resize', measure)
       window.removeEventListener('pointermove', onPointerMove)
